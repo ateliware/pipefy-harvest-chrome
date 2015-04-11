@@ -27,7 +27,7 @@
         configScript = document.createElement("script");
         configScript.innerHTML = "window._harvestPlatformConfig = " + (JSON.stringify(platformConfig)) + ";";
         platformScript = document.createElement("script");
-        platformScript.src = "//platform.harvestapp.com/assets/platform.js";
+        platformScript.src = "https://platform.harvestapp.com/assets/platform.js";
         platformScript.async = true;
         ph = document.getElementsByTagName("script")[0];
         ph.parentNode.insertBefore(configScript, ph);
@@ -82,21 +82,21 @@
           return function() {
             var actions, icon, timer, li;
             actions = document.querySelector(_this.actionSelector);
-            console.log(actions);
             if (!actions) {
               return;
             }
             li = document.createElement("li");
             timer = document.createElement("a");
-            timer.className = "harvest-timer button-link js-add-pipefy-timer";
-            timer.setAttribute("id", "pipefy-harvest-timer");
+            timer.className = "harvest-timer button-link js-add-trello-timer";
+            timer.setAttribute("id", "harvest-trello-timer");
+            timer.setAttribute("href", "#");
             timer.setAttribute("data-project", JSON.stringify(data.project));
             timer.setAttribute("data-item", JSON.stringify(data.item));
-            icon = document.createElement("span");
-            icon.className = "pipefy-timer-icon";
-            //icon.style.backgroundImage = "url('" + (chrome.extension.getURL("images/pipefy-timer-icon.png")) + "')";
+            icon = document.createElement("i");
+            icon.className = "fa fa-clock-o";
             timer.appendChild(icon);
-            timer.appendChild(document.createTextNode(" Track time…"));
+            timer.appendChild(document.createTextNode(" Track time"));
+            timer.onclick = function(e) { e.preventDefault(); };
             li.appendChild(timer);
             return actions.insertBefore(li, actions.children[1]);
           }
@@ -106,6 +106,7 @@
       PipefyProfile.prototype.notifyPlatformOfNewTimers = function() {
         var evt;
         evt = new CustomEvent("harvest-event:timers:chrome:add");
+        console.log(document.querySelector("#harvest-messaging"));
         return document.querySelector("#harvest-messaging").dispatchEvent(evt);
       };
 
@@ -123,7 +124,6 @@
           if (evt.data !== "urlChange") {
             return;
           }
-          console.log("listener called");
           return _this.addTimer();
         });
       };

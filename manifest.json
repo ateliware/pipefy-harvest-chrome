@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+
+  "name": "Pipefy Harvest Extension",
+  "description": "This extension integrate pipefy and harvest",
+  "version": "1.0",
+
+  "permissions": [
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": [ "http://app.pipefy.com/*" ],
+      "js": [ "pipefy.js" ]
+    }
+  ]
+}

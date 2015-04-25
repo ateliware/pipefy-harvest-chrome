@@ -50,8 +50,16 @@
         if (this.notEnoughInfo(data)) {
           return;
         }
-        this.buildTimer(data);
-        return this.notifyPlatformOfNewTimers();
+        var result;
+
+        setTimeout((function(_this) {
+          return function() {
+            _this.buildTimer(data);
+            result =  _this.notifyPlatformOfNewTimers();
+          }
+        })(this), 2000);
+
+        return result;
       };
 
       PipefyProfile.prototype.getDataForTimer = function() {
@@ -78,35 +86,34 @@
       };
 
       PipefyProfile.prototype.buildTimer = function(data) {
-        setTimeout((function(_this) {
-          return function() {
-            var actions, icon, timer, li;
-            actions = document.querySelector(_this.actionSelector);
-            if (!actions) {
-              return;
-            }
-            li = document.createElement("li");
-            timer = document.createElement("a");
-            timer.className = "harvest-timer button-link js-add-trello-timer";
-            timer.setAttribute("id", "harvest-trello-timer");
-            timer.setAttribute("href", "#");
-            timer.setAttribute("data-project", JSON.stringify(data.project));
-            timer.setAttribute("data-item", JSON.stringify(data.item));
-            icon = document.createElement("i");
-            icon.className = "fa fa-clock-o";
-            timer.appendChild(icon);
-            timer.appendChild(document.createTextNode(" Track time"));
-            timer.onclick = function(e) { e.preventDefault(); };
-            li.appendChild(timer);
-            return actions.insertBefore(li, actions.children[1]);
-          }
-        })(this), 1000);
+        var actions, icon, timer;
+        actions = document.querySelector(this.actionSelector);
+
+        if (!actions) {
+          return;
+        }
+
+        li = document.createElement("li");
+        timer = document.createElement("a");
+        timer.className = "harvest-timer button-link js-add-trello-timer";
+        timer.setAttribute("id", "harvest-trello-timer");
+        timer.setAttribute("href", "#");
+        timer.setAttribute("data-project", JSON.stringify(data.project));
+        timer.setAttribute("data-item", JSON.stringify(data.item));
+        icon = document.createElement("i");
+        icon.className = "fa fa-clock-o";
+        timer.appendChild(icon);
+        timer.appendChild(document.createTextNode(" Track time"));
+        li.appendChild(timer);
+
+        timer.onclick = function(evt) { evt.preventDefault(); }
+
+        return actions.insertBefore(li, actions.children[1]);
       };
 
       PipefyProfile.prototype.notifyPlatformOfNewTimers = function() {
         var evt;
         evt = new CustomEvent("harvest-event:timers:chrome:add");
-        console.log(document.querySelector("#harvest-messaging"));
         return document.querySelector("#harvest-messaging").dispatchEvent(evt);
       };
 
@@ -144,7 +151,7 @@
       return PipefyProfile;
 
     })();
-    console.log("Harvest for Pipefy extension. Github: http://github.com/gsholtz/harvest-trello-safari")
+    console.log("Harvest for Pipefy extension. Github: https://github.com/hprezia/pipefy-harvest-chrome")
     return new PipefyProfile();
   })();
 

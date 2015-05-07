@@ -3,7 +3,7 @@
 
   (function() {
     var PipefyProfile;
-    var debug = true;
+    var debug = false;
     PipefyProfile = (function() {
       function PipefyProfile(config) {
         this.config = config;
@@ -85,7 +85,7 @@
 
             !debug || console.info("button added!" + (_this.renderTries > 1 ? "(for the " + _this.renderTries + " time)" : ""));
           }
-        })(this), 10);
+        })(this), 100);
       }
 
       PipefyProfile.prototype.getDataForTimer = function() {
@@ -170,7 +170,7 @@
             if (actions == _this.actionElement) {
               checkOks++;
               // Check for rerendering only for ONE second
-              if (checkOks < 1000 / interval) {
+              if (checkOks < 2000 / interval) {
                 !debug || !debug || console.info("OK");
                 return; // All is ok, for now
               }

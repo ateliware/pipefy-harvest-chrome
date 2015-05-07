@@ -17,5 +17,5 @@ Extension for chrome to integrate pipefy and harvest
 
 ## Know Issues ##
 
-* Track time option doesn't appear:
-   * Close and open the card, wait 3 ~ 5 seconds and "tan dan" (or not)
+* ~~Track time option doesn't appear:~~
+   * ~~Close and open the card, wait 3 ~ 5 seconds and "tan dan" (or not)~~

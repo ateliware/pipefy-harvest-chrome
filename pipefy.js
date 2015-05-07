@@ -3,6 +3,7 @@
 
   (function() {
     var PipefyProfile;
+    var debug = true;
     PipefyProfile = (function() {
       function PipefyProfile(config) {
         this.config = config;
@@ -11,8 +12,12 @@
         this.cardNameSelector = ".card-details .card-header h1.card-name";
         this.actionSelector = ".add-more-launcher ul.dropdown-menu";
         this.platformLoaded = false;
+        this.actionElement = null;
+        this.renderTries = 0;
         this.loadHarvestPlatform();
+
         this.addTimerWhenUrlChanges();
+        this.addTimerIfAlreadyInCard();
       }
 
       PipefyProfile.prototype.loadHarvestPlatform = function() {
@@ -50,17 +55,38 @@
         if (this.notEnoughInfo(data)) {
           return;
         }
-        var result;
 
+        this.tryBuildTimer(data);
+      };
+
+      PipefyProfile.prototype.tryBuildTimer = function(data) {
         setTimeout((function(_this) {
           return function() {
-            _this.buildTimer(data);
-            result =  _this.notifyPlatformOfNewTimers();
-          }
-        })(this), 2000);
+            _this.renderTries++;
+            !debug || console.info("trying to add button");
 
-        return result;
-      };
+            var hasTimer = !!document.querySelector(".harvest-timer");
+            var hasActions = !!document.querySelector(_this.actionSelector);
+
+            if (hasTimer) {
+              !debug || console.info("already in!!!");
+              return;
+            }
+
+            if (!hasActions) {
+              !debug || console.info("pipefy is not ready...");
+              _this.tryBuildTimer();
+              return;
+            }
+
+            _this.buildTimer(data);
+            _this.notifyPlatformOfNewTimers();
+            _this.addTimerAgainIfElementRerendered();
+
+            !debug || console.info("button added!" + (_this.renderTries > 1 ? "(for the " + _this.renderTries + " time)" : ""));
+          }
+        })(this), 10);
+      }
 
       PipefyProfile.prototype.getDataForTimer = function() {
         var itemName, link, linkParts, projectName, _ref, _ref1;
@@ -93,6 +119,8 @@
           return;
         }
 
+        this.actionElement = actions;
+
         li = document.createElement("li");
         timer = document.createElement("a");
         timer.className = "harvest-timer button-link js-add-trello-timer";
@@ -116,6 +144,51 @@
         evt = new CustomEvent("harvest-event:timers:chrome:add");
         return document.querySelector("#harvest-messaging").dispatchEvent(evt);
       };
+
+      PipefyProfile.prototype.addTimerIfAlreadyInCard = function() {
+        var link = window.location.href;
+        var linkParts = !!link.match(/^https?:\/\/app.pipefy.com\/pipes\/[0-9]+#cards\/[0-9]+$/);
+        if(linkParts)
+          this.addTimer();
+      }
+
+      PipefyProfile.prototype.addTimerAgainIfElementRerendered = function() {
+        var checkOks = 0;
+        var interval = 100;
+        var handler = setInterval((function(_this){
+          return function(){
+            var actions = document.querySelector(_this.actionSelector);
+
+            if (!actions) {
+              // We are not at the card anymore!
+              !debug || console.info("Goodbye Mr. Card!");
+              _this.renderTries = 0;
+              clearInterval(handler);
+              return;
+            }
+
+            if (actions == _this.actionElement) {
+              checkOks++;
+              // Check for rerendering only for ONE second
+              if (checkOks < 1000 / interval) {
+                !debug || !debug || console.info("OK");
+                return; // All is ok, for now
+              }
+
+              // I bet it stopped rerendering stuff
+              !debug || console.info("Cleared");
+              _this.renderTries = 0;
+              clearInterval(handler);
+              return;
+            }
+
+            // It rerendered for some reason!
+            !debug || console.info("Card rerendered!");
+            clearInterval(handler);
+            _this.addTimer();
+          }
+        })(this), interval);
+      }
 
       PipefyProfile.prototype.addTimerWhenUrlChanges = function() {
         var ph, script,

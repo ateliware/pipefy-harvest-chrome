@@ -10,7 +10,7 @@
   ],
   "content_scripts": [
     {
-      "matches": [ "http://app.pipefy.com/*" ],
+      "matches": [ "http://app.pipefy.com/*", "https://app.pipefy.com/*" ],
       "js": [ "pipefy.js" ]
     }
   ]

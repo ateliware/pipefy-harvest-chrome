@@ -25,7 +25,7 @@
           _this = this;
         platformConfig = {
           applicationName: "Pipefy",
-          permalink: "http://app.pipefy.com/pipes/%PROJECT_ID%#cards/%ITEM_ID%",
+          permalink: "https://app.pipefy.com/pipes/%PROJECT_ID%#cards/%ITEM_ID%",
           environment: "production",
           skipStyling: true
         };
@@ -93,7 +93,7 @@
         itemName = (_ref = document.querySelector(this.cardNameSelector)) != null ? _ref.innerText.trim() : void 0;
         projectName = (_ref1 = document.querySelector(this.pipeNameSelector)) != null ? _ref1.innerText.trim() : void 0;
         link = window.location.href;
-        linkParts = link.match(/^http:\/\/app.pipefy.com\/pipes\/([0-9]+)#cards\/([0-9]+)$/);
+        linkParts = link.match(/^https?:\/\/app.pipefy.com\/pipes\/([0-9]+)#cards\/([0-9]+)$/);
         return {
           project: {
             id: linkParts != null ? linkParts[1] : void 0,

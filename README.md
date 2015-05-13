@@ -15,7 +15,7 @@ Extension for chrome to integrate pipefy and harvest
 
 * Alternatively, you can drag and drop the directory where your extension files live onto chrome://extensions in your browser to load it.
 
-## Know Issues ##
+## Known Issues ##
 
 * ~~Track time option doesn't appear:~~
    * ~~Close and open the card, wait 3 ~ 5 seconds and "tan dan" (or not)~~

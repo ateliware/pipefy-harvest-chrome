@@ -6,6 +6,7 @@
     var debug = false;
     PipefyProfile = (function() {
       function PipefyProfile(config) {
+        var _this;
         this.config = config;
         this.addTimer = __bind(this.addTimer, this);
         this.pipeNameSelector = ".pipe-header .pipe-title a";
@@ -14,10 +15,15 @@
         this.platformLoaded = false;
         this.actionElement = null;
         this.renderTries = 0;
-        this.loadHarvestPlatform();
 
-        this.addTimerWhenUrlChanges();
-        this.addTimerIfAlreadyInCard();
+        _this = this;
+        document.addEventListener('DOMContentLoaded', function() {
+          _this.loadHarvestPlatform();
+
+          _this.addTimerWhenUrlChanges();
+          _this.addTimerIfAlreadyInCard();
+        });
+
       }
 
       PipefyProfile.prototype.loadHarvestPlatform = function() {

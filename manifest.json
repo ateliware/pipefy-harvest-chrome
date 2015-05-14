@@ -11,7 +11,8 @@
   "content_scripts": [
     {
       "matches": [ "*://app.pipefy.com/*" ],
-      "js": [ "pipefy.js" ]
+      "js": [ "pipefy.js" ],
+      "run_at": "document_start"
     }
   ]
 }

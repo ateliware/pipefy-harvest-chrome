@@ -3,7 +3,7 @@
 
   (function() {
     var PipefyProfile;
-    var debug = false;
+    var debug = true;
     PipefyProfile = (function() {
       function PipefyProfile(config) {
         var _this;
@@ -50,11 +50,19 @@
       };
 
       PipefyProfile.prototype.addTimer = function() {
-        var data;
+        var data, timer;
+
+        timer = document.querySelector(".harvest-timer");
+
         if (!this.platformLoaded) {
+          !debug || console.info("No platform");
           return;
         }
-        if (document.querySelector(".harvest-timer") != null) {
+
+        if (timer != null) {
+          !debug || console.info("Timer present!");
+          //timer.parentNode.removeChild(timer);
+          //this.actionElement.insertBefore(timer, actionElement.children[0]);
           return;
         }
         data = this.getDataForTimer();
@@ -126,15 +134,15 @@
 
         this.actionElement = actions;
 
-        var spacer = document.createElement("span");
-        spacer.innerHTML = "&nbsp;";
-
         var timer = document.createElement("div");
         timer.className = "harvest-timer js-add-trello-timer date-block white";
         timer.setAttribute("id", "harvest-trello-timer");
         timer.setAttribute("data-project", JSON.stringify(data.project));
         timer.setAttribute("data-item", JSON.stringify(data.item));
         timer.style.cursor = "pointer";
+
+        var spacer = document.createElement("span");
+        spacer.innerHTML = "&nbsp;";
 
         var timerLabel = document.createElement("span");
         timerLabel.className = "label";
@@ -163,7 +171,6 @@
 
         timer.onclick = function(evt) { evt.preventDefault(); }
 
-        actions.width *= 1.35;
         actions.insertBefore(spacer, actions.children[0]);
         actions.insertBefore(timer, actions.children[0]);
       };
@@ -195,9 +202,15 @@
               return;
             }
 
+            if (_this.actionElement == actions)
+              return;
+
             // It rerendered for some reason!
             !debug || console.info("Card rerendered!");
             clearInterval(handler);
+            var timer = document.querySelector(".harvest-timer");
+            if (!!timer)
+              timer.parentNode.removeChild(timer);
             _this.renderTries = 0;
             _this.addTimer();
           }

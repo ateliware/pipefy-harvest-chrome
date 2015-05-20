@@ -10,8 +10,8 @@
         this.config = config;
         this.addTimer = __bind(this.addTimer, this);
         this.pipeNameSelector = ".pipe-header .pipe-title a";
-        this.cardNameSelector = ".card-details .card-header h1.card-name";
-        this.actionSelector = ".add-more-launcher ul.dropdown-menu";
+        this.cardNameSelector = "div.card-header div div.card-title div.content h1.card-name";
+        this.actionSelector = ".card-action-dates div";
         this.platformLoaded = false;
         this.actionElement = null;
         this.renderTries = 0;
@@ -81,7 +81,7 @@
 
             if (!hasActions) {
               !debug || console.info("pipefy is not ready...");
-              _this.tryBuildTimer();
+              _this.tryBuildTimer(data);
               return;
             }
 
@@ -118,8 +118,7 @@
       };
 
       PipefyProfile.prototype.buildTimer = function(data) {
-        var actions, icon, timer;
-        actions = document.querySelector(this.actionSelector);
+        var actions = document.querySelector(this.actionSelector);
 
         if (!actions) {
           return;
@@ -127,22 +126,46 @@
 
         this.actionElement = actions;
 
-        li = document.createElement("li");
-        timer = document.createElement("a");
-        timer.className = "harvest-timer button-link js-add-trello-timer";
+        var spacer = document.createElement("span");
+        spacer.innerHTML = "&nbsp;";
+
+        var timer = document.createElement("div");
+        timer.className = "harvest-timer js-add-trello-timer date-block white";
         timer.setAttribute("id", "harvest-trello-timer");
-        timer.setAttribute("href", "#");
         timer.setAttribute("data-project", JSON.stringify(data.project));
         timer.setAttribute("data-item", JSON.stringify(data.item));
-        icon = document.createElement("i");
-        icon.className = "fa fa-clock-o";
-        timer.appendChild(icon);
-        timer.appendChild(document.createTextNode(" Track time"));
-        li.appendChild(timer);
+        timer.style.cursor = "pointer";
+
+        var timerLabel = document.createElement("span");
+        timerLabel.className = "label";
+        timerLabel.innerHTML = "TRACK";
+
+        var timerDate = document.createElement("div");
+        timerDate.className = "date";
+
+        var timerDateDay = document.createElement("strong");
+        timerDateDay.className = "day";
+
+        var timerDateDayIcon = document.createElement("i");
+        timerDateDayIcon.className = "fa fa-clock-o";
+
+        var timerDateMonth = document.createElement("span");
+        timerDateMonth.className = "month";
+        timerDateMonth.innerHTML = "TIME";
+
+        timerDateDay.appendChild(timerDateDayIcon);
+
+        timerDate.appendChild(timerDateDay);
+        timerDate.appendChild(timerDateMonth);
+
+        timer.appendChild(timerLabel);
+        timer.appendChild(timerDate);
 
         timer.onclick = function(evt) { evt.preventDefault(); }
 
-        return actions.insertBefore(li, actions.children[1]);
+        actions.width *= 1.35;
+        actions.insertBefore(spacer, actions.children[0]);
+        actions.insertBefore(timer, actions.children[0]);
       };
 
       PipefyProfile.prototype.notifyPlatformOfNewTimers = function() {
@@ -159,8 +182,7 @@
       }
 
       PipefyProfile.prototype.addTimerAgainIfElementRerendered = function() {
-        var checkOks = 0;
-        var interval = 100;
+        var interval = 1000;
         var handler = setInterval((function(_this){
           return function(){
             var actions = document.querySelector(_this.actionSelector);
@@ -173,24 +195,10 @@
               return;
             }
 
-            if (actions == _this.actionElement) {
-              checkOks++;
-              // Check for rerendering only for ONE second
-              if (checkOks < 2000 / interval) {
-                !debug || !debug || console.info("OK");
-                return; // All is ok, for now
-              }
-
-              // I bet it stopped rerendering stuff
-              !debug || console.info("Cleared");
-              _this.renderTries = 0;
-              clearInterval(handler);
-              return;
-            }
-
             // It rerendered for some reason!
             !debug || console.info("Card rerendered!");
             clearInterval(handler);
+            _this.renderTries = 0;
             _this.addTimer();
           }
         })(this), interval);

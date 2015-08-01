@@ -2,7 +2,7 @@
   "manifest_version": 2,
 
   "name": "Pipefy Extension for Harvest",
-  "short_name": "Pipefy Extension for Harvest",
+  "short_name": "Pipefy Extension for tracking time in Harvest",
   "description": "Extension to track time from Pipefy in Harvest.",
   "version": "1.3",
 

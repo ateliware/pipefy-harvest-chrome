@@ -15,6 +15,7 @@
         this.platformLoaded = false;
         this.actionElement = null;
         this.renderTries = 0;
+        this.timerListItem = null;
 
         _this = this;
         document.addEventListener('DOMContentLoaded', function() {
@@ -54,9 +55,6 @@
         if (!this.platformLoaded) {
           return;
         }
-        if (document.querySelector(".harvest-timer") != null) {
-          return;
-        }
         data = this.getDataForTimer();
         if (this.notEnoughInfo(data)) {
           return;
@@ -66,8 +64,10 @@
       };
 
       PipefyProfile.prototype.tryBuildTimer = function(data) {
-        setTimeout((function(_this) {
-          return function() {
+        var _this = this;
+        setTimeout(function() {
+          if (document.querySelector(_this.actionSelector) != null) {
+            var modalClasses = document.querySelector('.modal').className
             _this.renderTries++;
             !debug || console.info("trying to add button");
 
@@ -75,13 +75,17 @@
             var hasActions = !!document.querySelector(_this.actionSelector);
 
             if (hasTimer) {
-              !debug || console.info("already in!!!");
-              return;
+              !debug || console.info("already in!!! romving it!");
+              if (this.actionElement != null) {
+                this.actionElement.removeChild(this.timerListItem);
+                this.actionElement = null;
+                this.timerListItem = null;
+              }
             }
 
             if (!hasActions) {
               !debug || console.info("pipefy is not ready...");
-              _this.tryBuildTimer();
+              _this.tryBuildTimer(data);
               return;
             }
 
@@ -90,8 +94,10 @@
             _this.addTimerAgainIfElementRerendered();
 
             !debug || console.info("button added!" + (_this.renderTries > 1 ? "(for the " + _this.renderTries + " time)" : ""));
+          } else {
+            _this.tryBuildTimer(data);
           }
-        })(this), 100);
+        }, 500);
       }
 
       PipefyProfile.prototype.getDataForTimer = function() {
@@ -99,14 +105,14 @@
         itemName = (_ref = document.querySelector(this.cardNameSelector)) != null ? _ref.innerText.trim() : void 0;
         projectName = (_ref1 = document.querySelector(this.pipeNameSelector)) != null ? _ref1.innerText.trim() : void 0;
         link = window.location.href;
-        linkParts = link.match(/^https?:\/\/app.pipefy.com\/pipes\/([0-9]+)#cards\/([0-9]+)$/);
+        linkParts = link.match(/^https?:\/\/app.pipefy.com(\/v2)?\/pipes\/([0-9]+)#cards\/([0-9]+)$/);
         return {
           project: {
-            id: linkParts != null ? linkParts[1] : void 0,
+            id: linkParts != null ? linkParts[2] : void 0,
             name: projectName
           },
           item: {
-            id: linkParts != null ? linkParts[2] : void 0,
+            id: linkParts != null ? linkParts[3] : void 0,
             name: itemName
           }
         };
@@ -127,7 +133,7 @@
 
         this.actionElement = actions;
 
-        li = document.createElement("li");
+        this.timerListItem = document.createElement("li");
         timer = document.createElement("a");
         timer.className = "harvest-timer button-link js-add-trello-timer";
         timer.setAttribute("id", "harvest-trello-timer");
@@ -138,11 +144,11 @@
         icon.className = "fa fa-clock-o";
         timer.appendChild(icon);
         timer.appendChild(document.createTextNode(" Track time"));
-        li.appendChild(timer);
+        this.timerListItem.appendChild(timer);
 
         timer.onclick = function(evt) { evt.preventDefault(); }
 
-        return actions.insertBefore(li, actions.children[1]);
+        return actions.insertBefore(this.timerListItem, actions.children[1]);
       };
 
       PipefyProfile.prototype.notifyPlatformOfNewTimers = function() {
@@ -153,14 +159,14 @@
 
       PipefyProfile.prototype.addTimerIfAlreadyInCard = function() {
         var link = window.location.href;
-        var linkParts = !!link.match(/^https?:\/\/app.pipefy.com\/pipes\/[0-9]+#cards\/[0-9]+$/);
+        var linkParts = !!link.match(/^https?:\/\/app.pipefy.com(\/v2)\/pipes\/[0-9]+#cards\/[0-9]+$/);
         if(linkParts)
           this.addTimer();
       }
 
       PipefyProfile.prototype.addTimerAgainIfElementRerendered = function() {
         var checkOks = 0;
-        var interval = 100;
+        var interval = 500;
         var handler = setInterval((function(_this){
           return function(){
             var actions = document.querySelector(_this.actionSelector);
@@ -210,7 +216,7 @@
           if (evt.data !== "urlChange") {
             return;
           }
-          return _this.addTimer();
+          _this.addTimer();
         });
       };
 
@@ -230,7 +236,7 @@
       return PipefyProfile;
 
     })();
-    console.log("Harvest for Pipefy extension. Github: https://github.com/hprezia/pipefy-harvest-chrome")
+    console.log("Harvest for Pipefy extension. Github: https://github.com/ateliware/pipefy-harvest-chrome")
     return new PipefyProfile();
   })();
 

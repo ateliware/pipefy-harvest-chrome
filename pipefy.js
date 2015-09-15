@@ -15,6 +15,7 @@
         this.platformLoaded = false;
         this.actionElement = null;
         this.renderTries = 0;
+        this.timerListItem = null;
 
         _this = this;
         document.addEventListener('DOMContentLoaded', function() {
@@ -77,14 +78,18 @@
             var hasTitle = !!document.querySelector(_this.cardNameSelector);
 
             if (hasTimer) {
-              !debug || console.info("already in!!!");
-              return;
+              !debug || console.info("already in!!! romving it!");
+              if (this.actionElement != null) {
+                this.actionElement.removeChild(this.timerListItem);
+                this.actionElement = null;
+                this.timerListItem = null;
+              }
             }
 
             data = _this.getDataForTimer();
             if (_this.notEnoughInfo(data) || !hasActions || !hasTitle) {
               !debug || console.info("pipefy is not ready...");
-              _this.tryBuildTimer();
+              _this.tryBuildTimer(data);
               return;
             }
 
@@ -93,8 +98,10 @@
             _this.addTimerAgainIfElementRerendered();
 
             !debug || console.info("button added!" + (_this.renderTries > 1 ? "(for the " + _this.renderTries + " time)" : ""));
+          } else {
+            _this.tryBuildTimer(data);
           }
-        })(this), 100);
+        }, 500);
       }
 
       PipefyProfile.prototype.getDataForTimer = function() {
@@ -106,11 +113,11 @@
 
         return {
           project: {
-            id: linkParts != null ? linkParts[1] : void 0,
+            id: linkParts != null ? linkParts[2] : void 0,
             name: projectName
           },
           item: {
-            id: linkParts != null ? linkParts[2] : void 0,
+            id: linkParts != null ? linkParts[3] : void 0,
             name: itemName
           }
         };
@@ -227,7 +234,7 @@
           if (evt.data !== "urlChange") {
             return;
           }
-          return _this.addTimer();
+          _this.addTimer();
         });
       };
 
@@ -247,7 +254,7 @@
       return PipefyProfile;
 
     })();
-    console.log("Harvest for Pipefy extension. Github: https://github.com/hprezia/pipefy-harvest-chrome")
+    console.log("Harvest for Pipefy extension. Github: https://github.com/ateliware/pipefy-harvest-chrome")
     return new PipefyProfile();
   })();
 

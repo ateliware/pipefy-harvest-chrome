@@ -68,7 +68,7 @@
       };
 
       PipefyProfile.prototype.tryBuildTimer = function() {
-        setTimeout((function(_this) {
+        setTimeout(function(_this) {
           return function() {
             _this.renderTries++;
             !debug || console.info("trying to add button");

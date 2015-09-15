@@ -24,7 +24,7 @@
           _this.addTimerWhenUrlChanges();
           _this.addTimerIfAlreadyInCard();
 
-          document.querySelector("sidebar-nav").style.display = "none";
+          //document.querySelector("sidebar-nav").style.display = "none";
         });
       }
 

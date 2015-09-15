@@ -3,15 +3,15 @@
 
   (function() {
     var PipefyProfile;
-    var debug = true;
+    var debug = false;
     PipefyProfile = (function() {
       function PipefyProfile(config) {
         var _this;
         this.config = config;
         this.addTimer = __bind(this.addTimer, this);
         this.pipeNameSelector = ".pipe-header .pipe-title a";
-        this.cardNameSelector = "div.card-header div div.card-title div.content h1.card-name";
-        this.actionSelector = ".card-action-dates div";
+        this.cardNameSelector = "div.card-title div.content h1.card-name";
+        this.actionSelector = ".card-action-dates";
         this.platformLoaded = false;
         this.actionElement = null;
         this.renderTries = 0;
@@ -23,7 +23,6 @@
           _this.addTimerWhenUrlChanges();
           _this.addTimerIfAlreadyInCard();
         });
-
       }
 
       PipefyProfile.prototype.loadHarvestPlatform = function() {
@@ -61,19 +60,13 @@
 
         if (timer != null) {
           !debug || console.info("Timer present!");
-          //timer.parentNode.removeChild(timer);
-          //this.actionElement.insertBefore(timer, actionElement.children[0]);
-          return;
-        }
-        data = this.getDataForTimer();
-        if (this.notEnoughInfo(data)) {
           return;
         }
 
-        this.tryBuildTimer(data);
+        this.tryBuildTimer();
       };
 
-      PipefyProfile.prototype.tryBuildTimer = function(data) {
+      PipefyProfile.prototype.tryBuildTimer = function() {
         setTimeout((function(_this) {
           return function() {
             _this.renderTries++;
@@ -81,15 +74,17 @@
 
             var hasTimer = !!document.querySelector(".harvest-timer");
             var hasActions = !!document.querySelector(_this.actionSelector);
+            var hasTitle = !!document.querySelector(_this.cardNameSelector);
 
             if (hasTimer) {
               !debug || console.info("already in!!!");
               return;
             }
 
-            if (!hasActions) {
+            data = _this.getDataForTimer();
+            if (_this.notEnoughInfo(data) || !hasActions || !hasTitle) {
               !debug || console.info("pipefy is not ready...");
-              _this.tryBuildTimer(data);
+              _this.tryBuildTimer();
               return;
             }
 
@@ -107,7 +102,8 @@
         itemName = (_ref = document.querySelector(this.cardNameSelector)) != null ? _ref.innerText.trim() : void 0;
         projectName = (_ref1 = document.querySelector(this.pipeNameSelector)) != null ? _ref1.innerText.trim() : void 0;
         link = window.location.href;
-        linkParts = link.match(/^https?:\/\/app.pipefy.com\/pipes\/([0-9]+)#cards\/([0-9]+)$/);
+        linkParts = link.match(/^https?:\/\/app\.pipefy\.com.*\/pipes\/([0-9]+)#cards\/([0-9]+)$/);
+
         return {
           project: {
             id: linkParts != null ? linkParts[1] : void 0,
@@ -183,7 +179,7 @@
 
       PipefyProfile.prototype.addTimerIfAlreadyInCard = function() {
         var link = window.location.href;
-        var linkParts = !!link.match(/^https?:\/\/app.pipefy.com\/pipes\/[0-9]+#cards\/[0-9]+$/);
+        var linkParts = !!link.match(/^https?:\/\/app\.pipefy\.com.*\/pipes\/[0-9]+#cards\/[0-9]+$/);
         if(linkParts)
           this.addTimer();
       }

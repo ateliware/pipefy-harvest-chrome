@@ -98,9 +98,6 @@
             _this.addTimerAgainIfElementRerendered();
 
             !debug || console.info("button added!" + (_this.renderTries > 1 ? "(for the " + _this.renderTries + " time)" : ""));
-          } else {
-            _this.tryBuildTimer(data);
-          }
         }, 500);
       }
 

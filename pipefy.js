@@ -98,7 +98,8 @@
             _this.addTimerAgainIfElementRerendered();
 
             !debug || console.info("button added!" + (_this.renderTries > 1 ? "(for the " + _this.renderTries + " time)" : ""));
-        }, 500);
+          }
+        })(this), 100);
       }
 
       PipefyProfile.prototype.getDataForTimer = function() {

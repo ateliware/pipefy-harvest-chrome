@@ -113,11 +113,11 @@
 
         return {
           project: {
-            id: linkParts != null ? linkParts[2] : void 0,
+            id: linkParts != null ? linkParts[1] : void 0,
             name: projectName
           },
           item: {
-            id: linkParts != null ? linkParts[3] : void 0,
+            id: linkParts != null ? linkParts[2] : void 0,
             name: itemName
           }
         };

@@ -23,8 +23,6 @@
 
           _this.addTimerWhenUrlChanges();
           _this.addTimerIfAlreadyInCard();
-
-          //document.querySelector("sidebar-nav").style.display = "none";
         });
       }
 
@@ -101,7 +99,7 @@
 
             !debug || console.info("button added!" + (_this.renderTries > 1 ? "(for the " + _this.renderTries + " time)" : ""));
           }
-        })(this), 100);
+        })(this), 500);
       }
 
       PipefyProfile.prototype.getDataForTimer = function() {

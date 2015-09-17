@@ -22,7 +22,7 @@
           _this.loadHarvestPlatform();
 
           _this.addTimerWhenUrlChanges();
-          _this.addTimerIfAlreadyInCard();
+          _this.addTimer();
         });
       }
 
@@ -50,6 +50,9 @@
       };
 
       PipefyProfile.prototype.addTimer = function() {
+        if (!this.isUrlCard())
+          return;
+
         var data, timer;
 
         timer = document.querySelector(".harvest-timer");
@@ -78,12 +81,8 @@
             var hasTitle = !!document.querySelector(_this.cardNameSelector);
 
             if (hasTimer) {
-              !debug || console.info("already in!!! romving it!");
-              if (this.actionElement != null) {
-                this.actionElement.removeChild(this.timerListItem);
-                this.actionElement = null;
-                this.timerListItem = null;
-              }
+              !debug || console.info("already in!!! leaving!");
+              return;
             }
 
             data = _this.getDataForTimer();
@@ -182,11 +181,9 @@
         return document.querySelector("#harvest-messaging").dispatchEvent(evt);
       };
 
-      PipefyProfile.prototype.addTimerIfAlreadyInCard = function() {
+      PipefyProfile.prototype.isUrlCard = function() {
         var link = window.location.href;
-        var linkParts = !!link.match(/^https?:\/\/app\.pipefy\.com.*\/pipes\/[0-9]+#cards\/[0-9]+$/);
-        if(linkParts)
-          this.addTimer();
+        return !!link.match(/^https?:\/\/app\.pipefy\.com.*\/pipes\/[0-9]+#\/?cards\/[0-9]+$/);
       }
 
       PipefyProfile.prototype.addTimerAgainIfElementRerendered = function() {

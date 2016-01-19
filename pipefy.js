@@ -10,8 +10,8 @@
         this.config = config;
         this.addTimer = __bind(this.addTimer, this);
         this.pipeNameSelector = ".pipe-header .pipe-title a";
-        this.cardNameSelector = ".card-details .card-header h1.card-name";
-        this.actionSelector = ".add-more-launcher ul.dropdown-menu";
+        this.cardNameSelector = "div.card-title div.content h1.card-name";
+        this.actionSelector = ".card-action-dates";
         this.platformLoaded = false;
         this.actionElement = null;
         this.renderTries = 0;
@@ -22,9 +22,8 @@
           _this.loadHarvestPlatform();
 
           _this.addTimerWhenUrlChanges();
-          _this.addTimerIfAlreadyInCard();
+          _this.addTimer();
         });
-
       }
 
       PipefyProfile.prototype.loadHarvestPlatform = function() {
@@ -51,39 +50,43 @@
       };
 
       PipefyProfile.prototype.addTimer = function() {
-        var data;
-        if (!this.platformLoaded) {
+        if (!this.isUrlCard())
           return;
-        }
-        data = this.getDataForTimer();
-        if (this.notEnoughInfo(data)) {
+
+        var data, timer;
+
+        timer = document.querySelector(".harvest-timer");
+
+        if (!this.platformLoaded) {
+          !debug || console.info("No platform");
           return;
         }
 
-        this.tryBuildTimer(data);
+        if (timer != null) {
+          !debug || console.info("Timer present!");
+          return;
+        }
+
+        this.tryBuildTimer();
       };
 
-      PipefyProfile.prototype.tryBuildTimer = function(data) {
-        var _this = this;
-        setTimeout(function() {
-          if (document.querySelector(_this.actionSelector) != null) {
-            var modalClasses = document.querySelector('.modal').className
+      PipefyProfile.prototype.tryBuildTimer = function() {
+        setTimeout((function(_this) {
+          return function() {
             _this.renderTries++;
             !debug || console.info("trying to add button");
 
             var hasTimer = !!document.querySelector(".harvest-timer");
             var hasActions = !!document.querySelector(_this.actionSelector);
+            var hasTitle = !!document.querySelector(_this.cardNameSelector);
 
             if (hasTimer) {
-              !debug || console.info("already in!!! romving it!");
-              if (this.actionElement != null) {
-                this.actionElement.removeChild(this.timerListItem);
-                this.actionElement = null;
-                this.timerListItem = null;
-              }
+              !debug || console.info("already in!!! leaving!");
+              return;
             }
 
-            if (!hasActions) {
+            data = _this.getDataForTimer();
+            if (_this.notEnoughInfo(data) || !hasActions || !hasTitle) {
               !debug || console.info("pipefy is not ready...");
               _this.tryBuildTimer(data);
               return;
@@ -94,10 +97,8 @@
             _this.addTimerAgainIfElementRerendered();
 
             !debug || console.info("button added!" + (_this.renderTries > 1 ? "(for the " + _this.renderTries + " time)" : ""));
-          } else {
-            _this.tryBuildTimer(data);
           }
-        }, 500);
+        })(this), 500);
       }
 
       PipefyProfile.prototype.getDataForTimer = function() {
@@ -105,14 +106,15 @@
         itemName = (_ref = document.querySelector(this.cardNameSelector)) != null ? _ref.innerText.trim() : void 0;
         projectName = (_ref1 = document.querySelector(this.pipeNameSelector)) != null ? _ref1.innerText.trim() : void 0;
         link = window.location.href;
-        linkParts = link.match(/^https?:\/\/app.pipefy.com(\/v2)?\/pipes\/([0-9]+)#cards\/([0-9]+)$/);
+        linkParts = link.match(/^https?:\/\/app\.pipefy\.com.*\/pipes\/([0-9]+)#cards\/([0-9]+)$/);
+
         return {
           project: {
-            id: linkParts != null ? linkParts[2] : void 0,
+            id: linkParts != null ? linkParts[1] : void 0,
             name: projectName
           },
           item: {
-            id: linkParts != null ? linkParts[3] : void 0,
+            id: linkParts != null ? linkParts[2] : void 0,
             name: itemName
           }
         };
@@ -124,8 +126,7 @@
       };
 
       PipefyProfile.prototype.buildTimer = function(data) {
-        var actions, icon, timer;
-        actions = document.querySelector(this.actionSelector);
+        var actions = document.querySelector(this.actionSelector);
 
         if (!actions) {
           return;
@@ -133,22 +134,45 @@
 
         this.actionElement = actions;
 
-        this.timerListItem = document.createElement("li");
-        timer = document.createElement("a");
-        timer.className = "harvest-timer button-link js-add-trello-timer";
+        var timer = document.createElement("div");
+        timer.className = "harvest-timer js-add-trello-timer date-block white";
         timer.setAttribute("id", "harvest-trello-timer");
-        timer.setAttribute("href", "#");
         timer.setAttribute("data-project", JSON.stringify(data.project));
         timer.setAttribute("data-item", JSON.stringify(data.item));
-        icon = document.createElement("i");
-        icon.className = "fa fa-clock-o";
-        timer.appendChild(icon);
-        timer.appendChild(document.createTextNode(" Track time"));
-        this.timerListItem.appendChild(timer);
+        timer.style.cursor = "pointer";
+
+        var spacer = document.createElement("span");
+        spacer.innerHTML = "&nbsp;";
+
+        var timerLabel = document.createElement("span");
+        timerLabel.className = "label";
+        timerLabel.innerHTML = "TRACK";
+
+        var timerDate = document.createElement("div");
+        timerDate.className = "date";
+
+        var timerDateDay = document.createElement("strong");
+        timerDateDay.className = "day";
+
+        var timerDateDayIcon = document.createElement("i");
+        timerDateDayIcon.className = "fa fa-clock-o";
+
+        var timerDateMonth = document.createElement("span");
+        timerDateMonth.className = "month";
+        timerDateMonth.innerHTML = "TIME";
+
+        timerDateDay.appendChild(timerDateDayIcon);
+
+        timerDate.appendChild(timerDateDay);
+        timerDate.appendChild(timerDateMonth);
+
+        timer.appendChild(timerLabel);
+        timer.appendChild(timerDate);
 
         timer.onclick = function(evt) { evt.preventDefault(); }
 
-        return actions.insertBefore(this.timerListItem, actions.children[1]);
+        actions.insertBefore(spacer, actions.children[0]);
+        actions.insertBefore(timer, actions.children[0]);
       };
 
       PipefyProfile.prototype.notifyPlatformOfNewTimers = function() {
@@ -157,16 +181,13 @@
         return document.querySelector("#harvest-messaging").dispatchEvent(evt);
       };
 
-      PipefyProfile.prototype.addTimerIfAlreadyInCard = function() {
+      PipefyProfile.prototype.isUrlCard = function() {
         var link = window.location.href;
-        var linkParts = !!link.match(/^https?:\/\/app.pipefy.com(\/v2)\/pipes\/[0-9]+#cards\/[0-9]+$/);
-        if(linkParts)
-          this.addTimer();
+        return !!link.match(/^https?:\/\/app\.pipefy\.com.*\/pipes\/[0-9]+#\/?cards\/[0-9]+$/);
       }
 
       PipefyProfile.prototype.addTimerAgainIfElementRerendered = function() {
-        var checkOks = 0;
-        var interval = 500;
+        var interval = 1000;
         var handler = setInterval((function(_this){
           return function(){
             var actions = document.querySelector(_this.actionSelector);
@@ -179,24 +200,16 @@
               return;
             }
 
-            if (actions == _this.actionElement) {
-              checkOks++;
-              // Check for rerendering only for ONE second
-              if (checkOks < 2000 / interval) {
-                !debug || !debug || console.info("OK");
-                return; // All is ok, for now
-              }
-
-              // I bet it stopped rerendering stuff
-              !debug || console.info("Cleared");
-              _this.renderTries = 0;
-              clearInterval(handler);
+            if (_this.actionElement == actions)
               return;
-            }
 
             // It rerendered for some reason!
             !debug || console.info("Card rerendered!");
             clearInterval(handler);
+            var timer = document.querySelector(".harvest-timer");
+            if (!!timer)
+              timer.parentNode.removeChild(timer);
+            _this.renderTries = 0;
             _this.addTimer();
           }
         })(this), interval);
